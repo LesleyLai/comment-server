@@ -1,0 +1,26 @@
+{
+  "name": "comments-server",
+  "version": "0.1.0",
+  "scripts": {
+    "clean": "bsb -clean-world",
+    "build": "bsb -make-world",
+    "watch": "bsb -make-world -w",
+    "watch-run": "nodemon lib/js/src/",
+    "start": "yarn build && yarn serve",
+    "serve": "node lib/js/src/index.bs.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@glennsl/bs-jest": "^0.4.9",
+    "bs-platform": "^7.0.1",
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "bs-express": "^1.0.0"
+  }
+}
