@@ -3,20 +3,17 @@ open Express;
 let app = express();
 
 let comments: array(Comment.t) = [|
-  {
-  id: 1,
-  name: "Bob",
-  date: Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
-  slug: "https://lesleylai.info",
-  parent_comment_id: None,
-  text: "Test the functionality of the comments"
-  }
+Comment.create(
+  ~id=1, ~name="bob",
+  ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
+  ~slug="https://lesleylai.info", ~parent_comment_id=Some(1),
+  ~text="Test the functionality of the comments")
 |];
 
 /* make a common JSON object representing success */
 let makeSuccessJson = () => {
   comments
-  |> Array.map(Comment.jsonfyComment)
+  |> Array.map(Comment.jsonfy)
   |> Js.Json.objectArray
 };
 

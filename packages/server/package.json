@@ -7,7 +7,7 @@
     "watch": "bsb -make-world -w",
     "watch-run": "nodemon lib/js/src/",
     "start": "yarn build && yarn serve",
-    "serve": "node lib/js/src/index.bs.js",
+    "serve": "node lib/js/src/index.js",
     "test": "jest"
   },
   "keywords": [
