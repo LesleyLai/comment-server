@@ -1,12 +1,13 @@
 # Comments Server
-I am tired of third-party comment server, so I build one my own to power [my blog](https://lesleylai.info).
+I am tired of third-party comment servers, so I try to build one to power [my blog](https://lesleylai.info). It is not in a usable stage yet.
 
-## Build
+## Develop
+### Build
 ```
 yarn build
 ```
 
-## Test
+### Test
 
 ```
 yarn test
@@ -14,7 +15,7 @@ yarn test
 
 Need to `build` first.
 
-## Watch
+### Watch
 
 In one terminal
 
