@@ -1,6 +1,15 @@
+open Belt;
+
+type guest = {
+  name: string,
+  url: option(string)
+};
+
+type commenter = Anonymous | Guest(guest);
+
 type t = {
   id: int,
-  name: string,
+  commenter: commenter,
   date: Js.Date.t,
   slug: string,
   parent_comment_id: option(int),
@@ -8,32 +17,78 @@ type t = {
 };
 
 let create = (~id: int,
-              ~name: string,
+              ~commenter: commenter,
               ~date: Js.Date.t,
               ~slug: string,
               ~parent_comment_id: option(int),
               ~text: string) => {
   {
-  id, name, date, slug, parent_comment_id, text
-}
-}
+  id, commenter, date, slug, parent_comment_id, text
+  }
+};
 
-let jsonfy = (comment: t) => {
-  let dict = Js.Dict.empty ();
-  Js.Dict.set(dict, "id", comment.id |> float_of_int |> Js.Json.number);
-  Js.Dict.set(dict, "name", Js.Json.string(comment.name));
-  Js.Dict.set(dict, "date", Js.Json.string(comment.date |> Js.Date.toString));
-  Js.Dict.set(dict, "slug", Js.Json.string(comment.slug));
-  let _ = comment.parent_comment_id
-    -> Belt.Option.map(float_of_int)
-    -> Belt.Option.map(Js.Json.number)
-    -> Belt.Option.map(Js.Dict.set(dict, "parent_comment_id"));
-  Js.Dict.set(dict, "text", Js.Json.string(comment.text));
-  dict
-}
+let prependIf = (lst, condition, toAppend) => {
+  if (condition) {
+    [toAppend, ...lst]
+  } else {
+    lst
+  }
+};
+
+module Encode = {
+  open! Json.Encode;
+
+  let commenter = (c: commenter) => {
+    switch(c) {
+    | Anonymous => null;
+    | Guest({name, url}) =>
+      let fields = [("name", string(name))]
+      ->prependIf(Option.isSome(url), ("url", nullable(string, url)));
+      object_(fields)
+    };
+  };
+
+  let comment = (c: t) => {
+    let fields = [
+      ("id", int(c.id)),
+      ("commenter", commenter(c.commenter)),
+      ("date", date(c.date)),
+      ("slug", string(c.slug)),
+      ("text", string(c.text))]
+      ->prependIf(Option.isSome(c.parent_comment_id),
+                 ("parent_comment_id", nullable(int, c.parent_comment_id)));
+    object_(fields)
+  }
+};
+
+module Decode = {
+  open! Json.Decode;
+
+  let commenter = (json: Js.Json.t) => {
+    oneOf([
+    nullAs(Anonymous),
+    (json) => Guest({
+      name: json |> field("name", string),
+      url: json |> optional(field("url", string))
+    })
+  ], json);
+  };
+
+  let comment = (json: Js.Json.t) => {
+    {
+    id: json |> field("id", int),
+    commenter: json |> field("commenter", commenter),
+    date: json |> field("date", date),
+    slug: json |> field("slug", string),
+    parent_comment_id: json |>
+      optional(field("parent_comment_id", int)),
+    text: json |> field("text", string),
+    }
+  };
+};
 
 let id = (comment: t) => comment.id;
-let name = (comment: t) => comment.name;
+let commenter = (comment: t) => comment.commenter;
 let date = (comment: t) => comment.date;
 let slug = (comment: t) => comment.slug;
 let parent_comment_id = (comment: t) => comment.parent_comment_id;

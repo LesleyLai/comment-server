@@ -2,52 +2,51 @@ open Jest;
 
 open Comment;
 
-let testComment = Comment.create(
-  ~id=1, ~name="bob",
-  ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
-  ~slug="https://lesleylai.info", ~parent_comment_id=Some(1),
-  ~text="Test the functionality of the comments");
-
-describe("Comment.jsonfy should serialization comments into JSON", () => {
+describe("commenter serialization", () => {
   open Expect;
   open! Expect.Operators;
 
-  let json = Comment.jsonfy(testComment);
+  let anonymous = Anonymous;
+  test("anonymous", () =>
+       expect(anonymous) == anonymous
+       ->Comment.Encode.commenter
+       ->Comment.Decode.commenter);
 
-  test("id", () =>
-       expect(Js.Dict.get(json, "id")
-              ->Belt.Option.flatMap(Js.Json.decodeNumber)
-              ->Belt.Option.map(int_of_float)) === Some(testComment->id)
-  );
+  let guest = Guest({ name: "bob", url: None });
+  test("guest", () =>
+       expect(guest) == guest
+       ->Comment.Encode.commenter
+       ->Comment.Decode.commenter);
 
-  test("name", () =>
-       expect(Js.Dict.get(json, "name")
-              ->Belt.Option.flatMap(Js.Json.decodeString))
-       === Some(testComment->name)
-  );
+  let guest2 = Guest({ name: "bob", url: Some("bob.com") });
+  test("guest with name", () =>
+       expect(guest2) == guest2
+       ->Comment.Encode.commenter
+       ->Comment.Decode.commenter);
+});
 
-  test("date", () =>
-       expect(Js.Dict.get(json, "date")
-              ->Belt.Option.flatMap(Js.Json.decodeString))
-       === Some((testComment->date) |> Js.Date.toString)
-  );
+describe("comment serialization", () => {
+  open Expect;
+  open! Expect.Operators;
 
-  test("slug", () =>
-       expect(Js.Dict.get(json, "slug")
-              ->Belt.Option.flatMap(Js.Json.decodeString))
-       === Some(testComment->slug)
-  );
+  let comment1 = Comment.create(
+    ~id=1, ~commenter=Guest({ name: "bob", url: None }),
+    ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
+    ~slug="https://lesleylai.info", ~parent_comment_id=None,
+    ~text="Test the functionality of the comments");
+  test("comment1", () =>
+       expect(comment1) == comment1
+       ->Comment.Encode.comment
+       ->Comment.Decode.comment);
 
-  test("parent_comment_id", () =>
-       expect(Js.Dict.get(json, "parent_comment_id")
-              ->Belt.Option.flatMap(Js.Json.decodeNumber)
-              ->Belt.Option.map(int_of_float))
-       === testComment->parent_comment_id
-  );
 
-  test("text", () =>
-       expect(Js.Dict.get(json, "text")
-              ->Belt.Option.flatMap(Js.Json.decodeString))
-       === Some(testComment->text)
-  );
+  let comment2 = Comment.create(
+    ~id=1, ~commenter=Anonymous,
+    ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=2., ()),
+    ~slug="https://lesleylai.info", ~parent_comment_id=Some(1),
+    ~text="Test the functionality of the comments");
+  test("comment2", () =>
+       expect(comment2) == comment2
+       ->Comment.Encode.comment
+       ->Comment.Decode.comment);
 });
