@@ -39,7 +39,6 @@ describe("comment serialization", () => {
        ->Comment.Encode.comment
        ->Comment.Decode.comment);
 
-
   let comment2 = Comment.create(
     ~id=1, ~commenter=Anonymous,
     ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=2., ()),

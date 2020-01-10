@@ -27,14 +27,6 @@ let create = (~id: int,
   }
 };
 
-let prependIf = (lst, condition, toAppend) => {
-  if (condition) {
-    [toAppend, ...lst]
-  } else {
-    lst
-  }
-};
-
 module Encode = {
   open! Json.Encode;
 
@@ -43,7 +35,7 @@ module Encode = {
     | Anonymous => null;
     | Guest({name, url}) =>
       let fields = [("name", string(name))]
-      ->prependIf(Option.isSome(url), ("url", nullable(string, url)));
+      ->ListUtil.addIf(Option.isSome(url), ("url", nullable(string, url)));
       object_(fields)
     };
   };
@@ -55,7 +47,7 @@ module Encode = {
       ("date", date(c.date)),
       ("slug", string(c.slug)),
       ("text", string(c.text))]
-      ->prependIf(Option.isSome(c.parent_comment_id),
+      ->ListUtil.addIf(Option.isSome(c.parent_comment_id),
                  ("parent_comment_id", nullable(int, c.parent_comment_id)));
     object_(fields)
   }
