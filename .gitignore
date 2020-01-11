@@ -25,3 +25,4 @@
 .bsb.lock
 lib
 node_modules
+*.log

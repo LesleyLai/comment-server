@@ -1,7 +1,21 @@
 {
   "name": "root",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "bsb -make-world",
+    "watch": "bsb -make-world -w",
+    "watch-run:server": "nodemon lib/js/packages/server/src/",
+    "serve:server": "node lib/js/packages/server/src/index.js",
+    "clean": "bsb -clean-world",
+    "test": "jest"
+  },
   "devDependencies": {
+    "@glennsl/bs-jest": "^0.4.9",
+    "bs-platform": "^7.0.1",
     "lerna": "^3.20.2"
   }
 }

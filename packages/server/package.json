@@ -1,22 +1,16 @@
 {
   "name": "comments-server",
   "version": "0.1.0",
-  "scripts": {
-    "clean": "bsb -clean-world",
-    "build": "bsb -make-world",
-    "watch": "bsb -make-world -w",
-    "watch-run": "nodemon lib/js/src/",
-    "start": "node lib/js/src/index.js",
-    "test": "jest"
-  },
   "keywords": [
     "BuckleScript"
   ],
-  "author": "",
+  "author": {
+    "name" : "Lesley Lai",
+    "email" : "lesley@lesleylai.info",
+    "url" : "https://lesleylai.info/"
+  },
   "license": "MIT",
   "devDependencies": {
-    "@glennsl/bs-jest": "^0.4.9",
-    "bs-platform": "^7.0.1",
     "nodemon": "^2.0.2"
   },
   "dependencies": {

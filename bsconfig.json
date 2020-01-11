@@ -1,0 +1,24 @@
+{
+  "name": "comments-server-mono",
+  "version": "0.1.0",
+  "sources": [{
+    "dir": "packages/server/src",
+    "subdirs": true
+  },
+  {
+    "dir": "__tests__",
+    "type": "dev",
+    "subdirs": true
+  }],
+  "package-specs": {
+    "module": "commonjs"
+  },
+  "bsc-flags": ["-bs-no-version-header", "-bs-super-errors"],
+  "bs-dependencies": [
+    "bs-express",
+    "@glennsl/bs-json"
+  ],
+  "bs-dev-dependencies": ["@glennsl/bs-jest"],
+  "refmt": 3,
+  "namespace": true
+}

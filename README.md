@@ -2,6 +2,11 @@
 I am tired of third-party comment servers, so I try to build one to power [my blog](https://lesleylai.info). It is not in a usable stage yet.
 
 ## Develop
+### Bootstrap
+```
+lerna bootstrap
+```
+
 ### Build
 ```
 yarn build
