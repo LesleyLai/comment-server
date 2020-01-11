@@ -45,6 +45,85 @@ ReactDOMRe.render(
   makeContainer("Fetched Dog Pictures"),
 );
 
+module TextAreaWrapper = {
+
+[@react.component]
+let make = (~children) => {
+
+  let textAreaStyle = ReactDOMRe.Style.make(
+    ~display="flex",
+    ~flexDirection="row",
+    ());
+
+  let profilePictureAreaStyle = ReactDOMRe.Style.make(
+      ~width="100px",
+      ~borderRight="1px solid red",
+    ());
+
+  let remainingAreaStyle = ReactDOMRe.Style.make(
+      ~flexGrow="1",
+    ());
+
+    <div style=textAreaStyle>
+      <div style=profilePictureAreaStyle>
+        {React.string("Icon")}
+      </div>
+      <div style=remainingAreaStyle>
+        children
+      </div>
+    </div>
+};
+
+}
+
+module Comments = {
+
+[@react.component]
+let make = () => {
+  let navStyle = ReactDOMRe.Style.make(
+    ~display="flex",
+    ~justifyContent="space-between",
+    ~borderBottom="2px solid lightgrey",
+    ~fontSize="15px", ());
+
+
+  <div>
+    <header>
+      <nav style=navStyle>
+        <div>
+        {React.string("9 comments")}
+        </div>
+        <div>
+        {React.string("Li Yu")}
+        </div>
+      </nav>
+      <TextAreaWrapper>
+        {React.string("Comments input area")}
+      </TextAreaWrapper>
+
+      <ul style=ReactDOMRe.Style.make(~listStyle="none", ~padding="0", ~margin="0", ())>
+        <li>
+          <TextAreaWrapper>
+            {React.string("Hello")}
+          </TextAreaWrapper>
+        </li>
+        <li>
+          <TextAreaWrapper>
+            {React.string("World")}
+          </TextAreaWrapper>
+        </li>
+      </ul>
+    </header>
+  </div>
+  }
+
+};
+
+ReactDOMRe.render(
+  <Comments />,
+  makeContainer("Show comments"),
+);
+
 // ReactDOMRe.render(
 //   <ReasonUsingJSUsingReason />,
 //   makeContainer("Reason Using JS Using Reason"),
