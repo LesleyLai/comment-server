@@ -16,7 +16,8 @@
   "bsc-flags": ["-bs-no-version-header", "-bs-super-errors"],
   "bs-dependencies": [
     "bs-express",
-    "@glennsl/bs-json"
+    "@glennsl/bs-json",
+    "react-frontend"
   ],
   "bs-dev-dependencies": ["@glennsl/bs-jest"],
   "refmt": 3,
