@@ -22,7 +22,7 @@ module Encode: {
 module Decode: {
   let commenter: Js.Json.t => commenter;
   let comment: Js.Json.t => t;
-}
+};
 
 // Getters
 let id: t => int;

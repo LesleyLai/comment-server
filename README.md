@@ -1,4 +1,7 @@
 # Comments Server
+
+[![Build Status](https://travis-ci.org/LesleyLai/comment-server.svg?branch=master)](https://travis-ci.org/LesleyLai/comment-server)
+
 I am tired of third-party comment servers, so I try to build one to power [my blog](https://lesleylai.info). It is not in a usable stage yet.
 
 ## Develop
