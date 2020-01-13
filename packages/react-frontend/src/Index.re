@@ -43,21 +43,12 @@ ReactDOMRe.render(
   makeContainer("Fetched Dog Pictures"),
 );
 
-module Styles = {
-  open Css;
+// Create color hue from hashing a string
+let hueFromString = s => {
+  let hash = ref(0);
+  s |> String.iter(c => {hash := Char.code(c) + hash^ lsl 5 - hash^});
 
-  let profile =
-    style([
-      width(px(50)),
-      height(px(50)),
-      borderRadius(pct(50.)),
-      color(hex("fff")),
-      backgroundColor(hex("512DA8")),
-      fontSize(px(30)),
-      textAlign(center),
-      lineHeight(px(50)),
-      margin(px(10)),
-    ]);
+  (hash^ mod 360)->float_of_int
 };
 
 module ProfilePicture = {
@@ -70,7 +61,7 @@ module ProfilePicture = {
         height(px(diameter)),
         borderRadius(pct(50.)),
         color(hex("fff")),
-        backgroundColor(hex("512DA8")),
+        backgroundColor(hsl(deg(userName->hueFromString), 100., 30.)),
         fontSize(px(30)),
         textAlign(center),
         lineHeight(px(diameter)),
@@ -83,7 +74,7 @@ module ProfilePicture = {
 
 module TextAreaWrapper = {
   [@react.component]
-  let make = (~children) => {
+  let make = (~children, ~userName) => {
     let textAreaStyle =
       ReactDOMRe.Style.make(
         ~display="flex",
@@ -98,9 +89,7 @@ module TextAreaWrapper = {
     let remainingAreaStyle = ReactDOMRe.Style.make(~flexGrow="1", ());
 
     <div style=textAreaStyle>
-      <div style=profileImageAreaStyle>
-        <ProfilePicture userName="Lesley" />
-      </div>
+      <div style=profileImageAreaStyle> <ProfilePicture userName /> </div>
       <div style=remainingAreaStyle> children </div>
     </div>;
   };
@@ -122,9 +111,9 @@ module Comments = {
       <header>
         <nav style=navStyle>
           <div> {React.string("9 comments")} </div>
-          <div> {React.string("Li Yu")} </div>
+          <div> {React.string("Lesley")} </div>
         </nav>
-        <TextAreaWrapper>
+        <TextAreaWrapper userName="Li Yu">
           {React.string("Comments input area")}
         </TextAreaWrapper>
         <ul
@@ -135,10 +124,14 @@ module Comments = {
             (),
           )}>
           <li>
-            <TextAreaWrapper> {React.string("Hello")} </TextAreaWrapper>
+            <TextAreaWrapper userName="Joy">
+              {React.string("Hello")}
+            </TextAreaWrapper>
           </li>
           <li>
-            <TextAreaWrapper> {React.string("World")} </TextAreaWrapper>
+            <TextAreaWrapper userName="Bob 2">
+              {React.string("World")}
+            </TextAreaWrapper>
           </li>
         </ul>
       </header>
