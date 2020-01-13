@@ -10,6 +10,7 @@
     "watch": "bsb -make-world -w",
     "watch-run:server": "nodemon lib/js/packages/server/src/",
     "serve:server": "node lib/js/packages/server/src/index.js",
+    "serve:react-frontend": "moduleserve ./packages/react-frontend --port 8000",
     "clean": "bsb -clean-world",
     "test": "jest"
   },
