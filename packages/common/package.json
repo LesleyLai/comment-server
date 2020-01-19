@@ -1,5 +1,5 @@
 {
-  "name": "comments-server-common",
+  "name": "common",
   "version": "0.1.0",
   "keywords": [
     "BuckleScript"
@@ -16,5 +16,8 @@
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w"
+  },
+  "devDependencies": {
+    "replace": "^1.1.5"
   }
 }

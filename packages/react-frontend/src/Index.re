@@ -1,5 +1,5 @@
 // Entry point
-open CommentsServerCommon;
+open Common;
 
 [@bs.val] external document: Js.t({..}) = "document";
 
@@ -153,8 +153,3 @@ module Comments = {
 };
 
 ReactDOMRe.render(<Comments />, makeContainer("Show comments"));
-
-// ReactDOMRe.render(
-//   <ReasonUsingJSUsingReason />,
-//   makeContainer("Reason Using JS Using Reason"),
-// );

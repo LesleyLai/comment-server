@@ -6,12 +6,13 @@
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build": "bsb -make-world",
-    "watch": "bsb -make-world -w",
+    "build": "lerna run --parallel build",
+    "watch": "lerna run --parallel watch",
+    "watch-run": "lerna run --parallel watch-run",
     "watch-run:server": "nodemon lib/js/packages/server/src/server.bs.js",
     "serve:server": "node lib/js/packages/server/src/server.bs.js",
     "serve:react-frontend": "moduleserve ./packages/react-frontend --port 8000",
-    "clean": "bsb -clean-world",
+    "clean": "lerna run --parallel clean",
     "test": "jest"
   },
   "devDependencies": {

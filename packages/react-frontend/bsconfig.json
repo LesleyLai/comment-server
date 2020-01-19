@@ -22,7 +22,8 @@
     "reason-react",
     "bs-css",
     "bs-fetch",
-    "comments-server-common"
+
+    "common"
   ],
   "bs-dev-dependencies": ["@glennsl/bs-jest"],
   "refmt": 3

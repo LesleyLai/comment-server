@@ -1,5 +1,7 @@
 open Express;
 
+open Common;
+
 // an imperative data structure that store all the comments
 module type Database = {
   type t;

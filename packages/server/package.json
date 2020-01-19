@@ -11,7 +11,15 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "replace": "^1.1.5"
+  },
+  "scripts": {
+    "build": "bsb -make-world",
+    "watch": "bsb -make-world -w",
+    "watch-run": "nodemon lib/js/src/server.bs.js",
+    "clean": "bsb -clean-world",
+    "test": "jest"
   },
   "dependencies": {
     "@glennsl/bs-json": "^5.0.1",

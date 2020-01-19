@@ -1,5 +1,5 @@
 {
-  "name": "common",
+  "name": "comments-server",
   "reason": {
     "react-jsx": 3
   },
@@ -13,8 +13,10 @@
   }],
   "suffix": ".bs.js",
   "bs-dependencies": [
-    "@glennsl/bs-json"
+    "@glennsl/bs-json",
+    "bs-express",
+
+    "common"
   ],
-  "refmt": 3,
-  "namespace": true
+  "refmt": 3
 }
