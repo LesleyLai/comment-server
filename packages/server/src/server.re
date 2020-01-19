@@ -40,6 +40,10 @@ let getDictString = (dict, key) =>
   | _ => None
   };
 
+// Express Server
+
+[@bs.module] external cors: 'a => Express.Middleware.t = "cors";
+
 module MakeServer = (DB: Database) => {
   let create = {
     let database = DB.create;
@@ -68,6 +72,9 @@ module MakeServer = (DB: Database) => {
     );
 
     let app = express();
+
+    // TODO: only enable cors conditionally
+    App.use(app, cors());
 
     App.get(app, ~path="/comments/:slug") @@
     Middleware.from((next, req) =>

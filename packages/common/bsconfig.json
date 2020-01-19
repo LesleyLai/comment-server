@@ -1,16 +1,11 @@
 {
-  "name": "react-frontend",
+  "name": "comments-server-common",
   "reason": {
     "react-jsx": 3
   },
   "sources": [{
     "dir" : "src",
     "subdirs" : true
-  },
-  {
-    "dir": "__tests__",
-    "type": "dev",
-    "subdirs": true
   }],
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
   "package-specs": [{
@@ -19,11 +14,7 @@
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
-    "reason-react",
-    "bs-css",
-    "bs-fetch",
-    "comments-server-common"
+    "@glennsl/bs-json"
   ],
-  "bs-dev-dependencies": ["@glennsl/bs-jest"],
   "refmt": 3
 }

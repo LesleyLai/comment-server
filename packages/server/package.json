@@ -16,6 +16,7 @@
   "dependencies": {
     "@glennsl/bs-json": "^5.0.1",
     "bs-express": "^1.0.0",
+    "cors": "^2.8.5",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0"
   }

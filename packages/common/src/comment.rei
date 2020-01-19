@@ -2,17 +2,23 @@ type t;
 
 type guest = {
   name: string,
-  url: option(string)
+  url: option(string),
 };
 
-type commenter = Anonymous | Guest(guest);
+type commenter =
+  | Anonymous
+  | Guest(guest);
 
-let create: (~id: int,
-             ~commenter: commenter,
-             ~date: Js.Date.t,
-             ~slug: string,
-             ~parent_comment_id: option(int),
-             ~text: string) => t;
+let create:
+  (
+    ~id: int,
+    ~commenter: commenter,
+    ~date: Js.Date.t,
+    ~slug: string,
+    ~parent_comment_id: option(int),
+    ~text: string
+  ) =>
+  t;
 
 module Encode: {
   let commenter: commenter => Js.Json.t;
@@ -22,6 +28,7 @@ module Encode: {
 module Decode: {
   let commenter: Js.Json.t => commenter;
   let comment: Js.Json.t => t;
+  let comments: Js.Json.t => array(t);
 };
 
 // Getters

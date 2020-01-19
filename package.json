@@ -8,8 +8,8 @@
     "bootstrap": "lerna bootstrap",
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w",
-    "watch-run:server": "nodemon lib/js/packages/server/src/",
-    "serve:server": "node lib/js/packages/server/src/index.js",
+    "watch-run:server": "nodemon lib/js/packages/server/src/server.bs.js",
+    "serve:server": "node lib/js/packages/server/src/server.bs.js",
     "serve:react-frontend": "moduleserve ./packages/react-frontend --port 8000",
     "clean": "bsb -clean-world",
     "test": "jest"
