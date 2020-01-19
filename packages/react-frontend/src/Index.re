@@ -66,6 +66,13 @@ module Style = {
       borderBottom(px(1), `solid, red)
     ]);
 
+    let commentEditor =
+      style([
+        resize(`vertical),
+        width(pct(100.)),
+        height(px(100))
+      ])
+
     let profileImageArea =
       style([
       width(px(100)),
@@ -132,6 +139,8 @@ module Comments = {
            )
       );
 
+    let userName = "Li Yu";
+
     <div>
       <header>
         <nav className=Style.nav>
@@ -139,10 +148,13 @@ module Comments = {
             Printf.sprintf("%i comments", Array.length(comments))
             |> React.string 
             } </div>
-          <div> {React.string("Lesley")} </div>
+          <div> {userName |> React.string} </div>
         </nav>
-        <TextAreaWrapper userName="Li Yu">
-        <textarea></textarea>
+        <TextAreaWrapper userName=userName>
+          <textarea className=Style.commentEditor />
+          <button>
+            {Printf.sprintf("post as %s", userName) |> React.string}
+          </button>
         </TextAreaWrapper>
         <ul className=Style.commentsList >
           {ReasonReact.array(
