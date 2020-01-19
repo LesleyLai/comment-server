@@ -5,13 +5,14 @@ let textArea =
     display(flexBox),
     flexDirection(row),
     borderBottom(px(1), `solid, red),
+    padding(px(5)),
   ]);
 
 let commentEditor =
   style([resize(`vertical), width(pct(100.)), height(px(100))]);
 
 let profileImageArea =
-  style([width(px(100)), borderRight(px(1), `solid, red)]);
+  style([width(px(75)), borderRight(px(1), `solid, red)]);
 
 let remainingArea = style([flexGrow(1.)]);
 

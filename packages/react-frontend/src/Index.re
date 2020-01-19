@@ -67,6 +67,50 @@ module TextAreaWrapper = {
   };
 };
 
+module CommentInputArea = {
+  [@react.component]
+  let make = (~userName) => {
+    <TextAreaWrapper userName>
+      <textarea className=Style.commentEditor />
+      <button>
+        {Printf.sprintf("post as %s", userName) |> React.string}
+      </button>
+    </TextAreaWrapper>;
+  };
+};
+
+module CommentArea = {
+  [@react.component]
+  let make = (~comment, ~userName) => {
+    let (replyToggle, setReplyToggle) = React.useState(() => false);
+
+    let commenterUserName =
+          switch (comment->Comment.commenter) {
+          | Comment.Anonymous => "anonymous"
+          | Comment.Guest(guest) => guest.name
+          };
+
+    <TextAreaWrapper userName=commenterUserName>
+      <header className=Style.commentHeader>
+        <span> {commenterUserName |> React.string} </span>
+        <span className=Style.bullet> {"*" |> React.string} </span>
+        <span>
+          {comment->Comment.date |> Js.Date.toDateString |> React.string}
+        </span>
+      </header>
+      <div className=Style.commentBody>
+        {React.string(comment->Comment.text)}
+      </div>
+      <footer>
+        <a href="#" onClick={_ => setReplyToggle(_ => !replyToggle)}>
+          {"reply" |> React.string}
+        </a>
+        { replyToggle ? <CommentInputArea userName /> : React.null }
+      </footer>
+    </TextAreaWrapper>;
+  };
+};
+
 module Comments = {
   [@react.component]
   let make = () => {
@@ -83,10 +127,10 @@ module Comments = {
             (),
           ),
         )
-        |> then_(Fetch.Response.text)
-        |> then_((text: string) =>
+        |> then_(Fetch.Response.json)
+        |> then_((text: Js.Json.t) =>
              setComments(_ =>
-               text |> Js.Json.parseExn |> Comment.Decode.comments
+               text |> Comment.Decode.comments
              )
              |> resolve
            )
@@ -103,41 +147,14 @@ module Comments = {
           </div>
           <div> {userName |> React.string} </div>
         </nav>
-        <TextAreaWrapper userName>
-          <textarea className=Style.commentEditor />
-          <button>
-            {Printf.sprintf("post as %s", userName) |> React.string}
-          </button>
-        </TextAreaWrapper>
+        <CommentInputArea userName />
         <ul className=Style.commentsList>
           {ReasonReact.array(
              {
                comments
                |> Array.map(comment => {
-                    let userName =
-                      switch (comment->Comment.commenter) {
-                      | Comment.Anonymous => "anonymous"
-                      | Comment.Guest(guest) => guest.name
-                      };
-
                     <li key={comment->Comment.id |> string_of_int}>
-                      <TextAreaWrapper userName>
-                        <header className=Style.commentHeader>
-                          <span> {userName |> React.string} </span>
-                          <span className=Style.bullet> {"*" |> React.string} </span>
-                          <span>
-                            {comment->Comment.date
-                             |> Js.Date.toDateString
-                             |> React.string}
-                          </span>
-                        </header>
-                        <div className=Style.commentBody>
-                          {React.string(comment->Comment.text)}
-                        </div>
-                        <footer>
-                          <a href="#">{"reply" |> React.string}</a>
-                        </footer>
-                      </TextAreaWrapper>
+                      <CommentArea userName comment />
                     </li>;
                   });
              },
