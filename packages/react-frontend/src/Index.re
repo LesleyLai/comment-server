@@ -36,7 +36,7 @@ let hueFromString = s => {
   (hash^ mod 360)->float_of_int;
 };
 
-module ProfilePicture = {
+module ProfileImage = {
   [@react.component]
   let make = (~userName: string, ~diameter=50) => {
     open Css;
@@ -57,25 +57,50 @@ module ProfilePicture = {
   };
 };
 
+module Style = {
+  open Css;
+  let textArea =
+    style([
+      display(flexBox),
+      flexDirection(row),
+      borderBottom(px(1), `solid, red)
+    ]);
+
+    let profileImageArea =
+      style([
+      width(px(100)),
+      borderRight(px(1), `solid, red)
+    ]);
+
+    let remainingArea = 
+      style([
+        flexGrow(1.)
+    ]);
+
+    let nav =
+      style([
+        display(flexBox),
+        justifyContent(spaceBetween),
+        borderBottom(px(2), `solid, lightgrey),
+        fontSize(px(15))
+    ]);
+
+    let commentsList = 
+      style([
+        listStyleType(`none),
+        padding(zero),
+        margin(zero)
+
+    ]);
+}
+
 module TextAreaWrapper = {
   [@react.component]
   let make = (~children, ~userName) => {
-    let textAreaStyle =
-      ReactDOMRe.Style.make(
-        ~display="flex",
-        ~flexDirection="row",
-        ~borderBottom="1px solid red",
-        (),
-      );
 
-    let profileImageAreaStyle =
-      ReactDOMRe.Style.make(~width="100px", ~borderRight="1px solid red", ());
-
-    let remainingAreaStyle = ReactDOMRe.Style.make(~flexGrow="1", ());
-
-    <div style=textAreaStyle>
-      <div style=profileImageAreaStyle> <ProfilePicture userName /> </div>
-      <div style=remainingAreaStyle> children </div>
+    <div className=Style.textArea>
+      <div className=Style.profileImageArea> <ProfileImage userName /> </div>
+      <div className=Style.remainingArea> children </div>
     </div>;
   };
 };
@@ -83,14 +108,7 @@ module TextAreaWrapper = {
 module Comments = {
   [@react.component]
   let make = () => {
-    let navStyle =
-      ReactDOMRe.Style.make(
-        ~display="flex",
-        ~justifyContent="space-between",
-        ~borderBottom="2px solid lightgrey",
-        ~fontSize="15px",
-        (),
-      );
+    
 
     let (comments, setComments) = React.useState(() => [||]);
 
@@ -116,20 +134,17 @@ module Comments = {
 
     <div>
       <header>
-        <nav style=navStyle>
-          <div> {React.string("9 comments")} </div>
+        <nav className=Style.nav>
+          <div> {
+            Printf.sprintf("%i comments", Array.length(comments))
+            |> React.string 
+            } </div>
           <div> {React.string("Lesley")} </div>
         </nav>
         <TextAreaWrapper userName="Li Yu">
-          {React.string("Comments input area")}
+        <textarea></textarea>
         </TextAreaWrapper>
-        <ul
-          style={ReactDOMRe.Style.make(
-            ~listStyle="none",
-            ~padding="0",
-            ~margin="0",
-            (),
-          )}>
+        <ul className=Style.commentsList >
           {ReasonReact.array(
              {comments
               |> Array.map(comment => {
