@@ -57,54 +57,9 @@ module ProfileImage = {
   };
 };
 
-module Style = {
-  open Css;
-  let textArea =
-    style([
-      display(flexBox),
-      flexDirection(row),
-      borderBottom(px(1), `solid, red)
-    ]);
-
-    let commentEditor =
-      style([
-        resize(`vertical),
-        width(pct(100.)),
-        height(px(100))
-      ])
-
-    let profileImageArea =
-      style([
-      width(px(100)),
-      borderRight(px(1), `solid, red)
-    ]);
-
-    let remainingArea = 
-      style([
-        flexGrow(1.)
-    ]);
-
-    let nav =
-      style([
-        display(flexBox),
-        justifyContent(spaceBetween),
-        borderBottom(px(2), `solid, lightgrey),
-        fontSize(px(15))
-    ]);
-
-    let commentsList = 
-      style([
-        listStyleType(`none),
-        padding(zero),
-        margin(zero)
-
-    ]);
-}
-
 module TextAreaWrapper = {
   [@react.component]
   let make = (~children, ~userName) => {
-
     <div className=Style.textArea>
       <div className=Style.profileImageArea> <ProfileImage userName /> </div>
       <div className=Style.remainingArea> children </div>
@@ -115,8 +70,6 @@ module TextAreaWrapper = {
 module Comments = {
   [@react.component]
   let make = () => {
-    
-
     let (comments, setComments) = React.useState(() => [||]);
 
     let _ =
@@ -144,34 +97,50 @@ module Comments = {
     <div>
       <header>
         <nav className=Style.nav>
-          <div> {
-            Printf.sprintf("%i comments", Array.length(comments))
-            |> React.string 
-            } </div>
+          <div>
+            {Printf.sprintf("%i comments", Array.length(comments))
+             |> React.string}
+          </div>
           <div> {userName |> React.string} </div>
         </nav>
-        <TextAreaWrapper userName=userName>
+        <TextAreaWrapper userName>
           <textarea className=Style.commentEditor />
           <button>
             {Printf.sprintf("post as %s", userName) |> React.string}
           </button>
         </TextAreaWrapper>
-        <ul className=Style.commentsList >
+        <ul className=Style.commentsList>
           {ReasonReact.array(
-             {comments
-              |> Array.map(comment => {
-                   let userName =
-                     switch (comment->Comment.commenter) {
-                     | Comment.Anonymous => "anonymous"
-                     | Comment.Guest(guest) => guest.name
-                     };
+             {
+               comments
+               |> Array.map(comment => {
+                    let userName =
+                      switch (comment->Comment.commenter) {
+                      | Comment.Anonymous => "anonymous"
+                      | Comment.Guest(guest) => guest.name
+                      };
 
-                   <li key={comment->Comment.id |> string_of_int}>
-                     <TextAreaWrapper userName>
-                       {React.string(comment->Comment.text)}
-                     </TextAreaWrapper>
-                   </li>;
-                 })},
+                    <li key={comment->Comment.id |> string_of_int}>
+                      <TextAreaWrapper userName>
+                        <header className=Style.commentHeader>
+                          <span> {userName |> React.string} </span>
+                          <span className=Style.bullet> {"*" |> React.string} </span>
+                          <span>
+                            {comment->Comment.date
+                             |> Js.Date.toDateString
+                             |> React.string}
+                          </span>
+                        </header>
+                        <div className=Style.commentBody>
+                          {React.string(comment->Comment.text)}
+                        </div>
+                        <footer>
+                          <a href="#">{"reply" |> React.string}</a>
+                        </footer>
+                      </TextAreaWrapper>
+                    </li>;
+                  });
+             },
            )}
         </ul>
       </header>
