@@ -20,6 +20,11 @@ type withParent = {
   parent_id: option(int),
 };
 
+type withChildren = {
+  comment: t,
+  children: Js.Dict.t(t)
+};
+
 let create =
     (~commenter: commenter, ~date: Js.Date.t, ~slug: string, ~text: string) => {
   {commenter, date, slug, text};
@@ -27,6 +32,10 @@ let create =
 
 let createWithParent = (~comment: t, ~parent_id: option(int)) => {
   {comment, parent_id};
+};
+
+let createWithChildren = (~comment: t, ~children: Js.Dict.t(t)) => {
+  {comment, children};
 };
 
 module Encode = {
@@ -66,6 +75,15 @@ module Encode = {
   };
 
   let commentWithParentDict = dict(commentWithParent);
+
+  let commentWithChildren = (w: withChildren) => {
+    let fields =
+      [("comment", comment(w.comment)),
+       ("children", dict(comment, w.children))];
+    object_(fields);
+  };
+
+  let commentWithChildrenDict = dict(commentWithChildren);
 };
 
 module Decode = {
@@ -94,9 +112,16 @@ module Decode = {
     };
   };
 
-  let commentWithParentDict = (json: Js.Json.t) => {
-    json |> dict(commentWithParent);
+  let commentWithParentDict = dict(commentWithParent);
+
+  let commentWithChildren = (json: Js.Json.t) => {
+    {
+      comment: json |> field("comment", comment),
+      children: json |> field("children", dict(comment))
+    };
   };
+
+  let commentWithChildrenDict = dict(commentWithChildren);
 };
 
 let commenter = (comment: t) => comment.commenter;

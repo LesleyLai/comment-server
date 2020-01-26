@@ -9,6 +9,7 @@ type commenter =
   | Guest(guest);
 
 type withParent;
+type withChildren;
 
 let create:
   (
@@ -20,13 +21,15 @@ let create:
   t;
 
 let createWithParent: (~comment: t, ~parent_id: option(int)) => withParent;
-
+let createWithChildren: (~comment: t, ~children: Js.Dict.t(t)) => withChildren;
 
 module Encode: {
   let commenter: commenter => Js.Json.t;
   let comment: t => Js.Json.t;
   let commentWithParent: withParent => Js.Json.t;
   let commentWithParentDict: Js.Dict.t(withParent) => Js.Json.t;
+  let commentWithChildren: withChildren => Js.Json.t;
+  let commentWithChildrenDict: Js.Dict.t(withChildren) => Js.Json.t;
 };
 
 module Decode: {
@@ -34,6 +37,8 @@ module Decode: {
   let comment: Js.Json.t => t;
   let commentWithParent: Js.Json.t => withParent;
   let commentWithParentDict: Js.Json.t => Js.Dict.t(withParent);
+  let commentWithChildren: Js.Json.t => withChildren;
+  let commentWithChildrenDict: Js.Json.t => Js.Dict.t(withChildren);
 };
 
 // Getters
