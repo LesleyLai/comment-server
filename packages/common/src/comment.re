@@ -17,21 +17,16 @@ type t = {
 
 type withParent = {
   comment: t,
-  parent_id: option(int)
+  parent_id: option(int),
 };
 
 let create =
-    (
-      ~commenter: commenter,
-      ~date: Js.Date.t,
-      ~slug: string,
-      ~text: string,
-    ) => {
+    (~commenter: commenter, ~date: Js.Date.t, ~slug: string, ~text: string) => {
   {commenter, date, slug, text};
 };
 
-let createWithParent= (~comment: t, ~parent_id: option(int)) => {
-  {comment, parent_id}
+let createWithParent = (~comment: t, ~parent_id: option(int)) => {
+  {comment, parent_id};
 };
 
 module Encode = {
@@ -51,35 +46,36 @@ module Encode = {
   };
 
   let comment = (c: t) => {
-    let fields =
-      [
-        ("commenter", commenter(c.commenter)),
-        ("date", date(c.date)),
-        ("slug", string(c.slug)),
-        ("text", string(c.text)),
-      ];
+    let fields = [
+      ("commenter", commenter(c.commenter)),
+      ("date", date(c.date)),
+      ("slug", string(c.slug)),
+      ("text", string(c.text)),
+    ];
     object_(fields);
   };
 
   let commentWithParent = (w: withParent) => {
     let fields =
-        [("comment", comment(w.comment))]
-        ->ListUtil.addIf(
-            Option.isSome(w.parent_id),
-            ("url", nullable(int, w.parent_id)),
-          );
+      [("comment", comment(w.comment))]
+      ->ListUtil.addIf(
+          Option.isSome(w.parent_id),
+          ("parent_id", nullable(int, w.parent_id)),
+        );
     object_(fields);
   };
+
+  let commentWithParentDict = dict(commentWithParent);
 };
 
 module Decode = {
   open! Json.Decode;
 
   let commenter = (json: Js.Json.t) => {
-          Guest({
-            name: json |> field("name", string),
-            url: json |> optional(field("url", string)),
-    })
+    Guest({
+      name: json |> field("name", string),
+      url: json |> optional(field("url", string)),
+    });
   };
 
   let comment = (json: Js.Json.t) => {
@@ -94,12 +90,12 @@ module Decode = {
   let commentWithParent = (json: Js.Json.t) => {
     {
       comment: json |> field("comment", comment),
-      parent_id: json |> optional(field("parent_id", int))
-    }
-  }
+      parent_id: json |> optional(field("parent_id", int)),
+    };
+  };
 
-  let comments = (json: Js.Json.t) => {
-    json |> array(comment);
+  let commentWithParentDict = (json: Js.Json.t) => {
+    json |> dict(commentWithParent);
   };
 };
 

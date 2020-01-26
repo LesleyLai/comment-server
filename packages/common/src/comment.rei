@@ -21,17 +21,19 @@ let create:
 
 let createWithParent: (~comment: t, ~parent_id: option(int)) => withParent;
 
+
 module Encode: {
   let commenter: commenter => Js.Json.t;
   let comment: t => Js.Json.t;
   let commentWithParent: withParent => Js.Json.t;
+  let commentWithParentDict: Js.Dict.t(withParent) => Js.Json.t;
 };
 
 module Decode: {
   let commenter: Js.Json.t => commenter;
   let comment: Js.Json.t => t;
   let commentWithParent: Js.Json.t => withParent;
-  let comments: Js.Json.t => array(t);
+  let commentWithParentDict: Js.Json.t => Js.Dict.t(withParent);
 };
 
 // Getters

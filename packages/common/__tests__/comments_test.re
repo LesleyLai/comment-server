@@ -70,4 +70,11 @@ describe("comments with parent serialization", () => {
        expect(commentWP2) == commentWP2
        ->Comment.Encode.commentWithParent
        ->Comment.Decode.commentWithParent);
+
+  let dict = Js.Dict.fromList([
+       ("0", commentWP1), ("1", commentWP2)]);
+  test("commentWP dict", () =>
+       expect(dict) == dict
+       ->Comment.Encode.commentWithParentDict
+       ->Comment.Decode.commentWithParentDict);
 });
