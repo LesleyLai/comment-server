@@ -6,35 +6,36 @@ type guest = {
 };
 
 type commenter =
-  | Anonymous
   | Guest(guest);
+
+type withParent;
 
 let create:
   (
-    ~id: int,
     ~commenter: commenter,
     ~date: Js.Date.t,
     ~slug: string,
-    ~parent_comment_id: option(int),
     ~text: string
   ) =>
   t;
 
+let createWithParent: (~comment: t, ~parent_id: option(int)) => withParent;
+
 module Encode: {
   let commenter: commenter => Js.Json.t;
   let comment: t => Js.Json.t;
+  let commentWithParent: withParent => Js.Json.t;
 };
 
 module Decode: {
   let commenter: Js.Json.t => commenter;
   let comment: Js.Json.t => t;
+  let commentWithParent: Js.Json.t => withParent;
   let comments: Js.Json.t => array(t);
 };
 
 // Getters
-let id: t => int;
 let commenter: t => commenter;
 let date: t => Js.Date.t;
 let slug: t => string;
-let parent_comment_id: t => option(int);
 let text: t => string;

@@ -6,28 +6,32 @@ type guest = {
 };
 
 type commenter =
-  | Anonymous
   | Guest(guest);
 
 type t = {
-  id: int,
   commenter,
   date: Js.Date.t,
   slug: string,
-  parent_comment_id: option(int),
   text: string,
+};
+
+type withParent = {
+  comment: t,
+  parent_id: option(int)
 };
 
 let create =
     (
-      ~id: int,
       ~commenter: commenter,
       ~date: Js.Date.t,
       ~slug: string,
-      ~parent_comment_id: option(int),
       ~text: string,
     ) => {
-  {id, commenter, date, slug, parent_comment_id, text};
+  {commenter, date, slug, text};
+};
+
+let createWithParent= (~comment: t, ~parent_id: option(int)) => {
+  {comment, parent_id}
 };
 
 module Encode = {
@@ -35,7 +39,6 @@ module Encode = {
 
   let commenter = (c: commenter) => {
     switch (c) {
-    | Anonymous => null
     | Guest({name, url}) =>
       let fields =
         [("name", string(name))]
@@ -50,16 +53,21 @@ module Encode = {
   let comment = (c: t) => {
     let fields =
       [
-        ("id", int(c.id)),
         ("commenter", commenter(c.commenter)),
         ("date", date(c.date)),
         ("slug", string(c.slug)),
         ("text", string(c.text)),
-      ]
-      ->ListUtil.addIf(
-          Option.isSome(c.parent_comment_id),
-          ("parent_comment_id", nullable(int, c.parent_comment_id)),
-        );
+      ];
+    object_(fields);
+  };
+
+  let commentWithParent = (w: withParent) => {
+    let fields =
+        [("comment", comment(w.comment))]
+        ->ListUtil.addIf(
+            Option.isSome(w.parent_id),
+            ("url", nullable(int, w.parent_id)),
+          );
     object_(fields);
   };
 };
@@ -68,38 +76,34 @@ module Decode = {
   open! Json.Decode;
 
   let commenter = (json: Js.Json.t) => {
-    oneOf(
-      [
-        nullAs(Anonymous),
-        json =>
           Guest({
             name: json |> field("name", string),
             url: json |> optional(field("url", string)),
-          }),
-      ],
-      json,
-    );
+    })
   };
 
   let comment = (json: Js.Json.t) => {
     {
-      id: json |> field("id", int),
       commenter: json |> field("commenter", commenter),
       date: json |> field("date", date),
       slug: json |> field("slug", string),
-      parent_comment_id: json |> optional(field("parent_comment_id", int)),
       text: json |> field("text", string),
     };
   };
+
+  let commentWithParent = (json: Js.Json.t) => {
+    {
+      comment: json |> field("comment", comment),
+      parent_id: json |> optional(field("parent_id", int))
+    }
+  }
 
   let comments = (json: Js.Json.t) => {
     json |> array(comment);
   };
 };
 
-let id = (comment: t) => comment.id;
 let commenter = (comment: t) => comment.commenter;
 let date = (comment: t) => comment.date;
 let slug = (comment: t) => comment.slug;
-let parent_comment_id = (comment: t) => comment.parent_comment_id;
 let text = (comment: t) => comment.text;
