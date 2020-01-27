@@ -18,10 +18,11 @@ module type Database = {
 };
 
 module MockDatabase: Database = {
-  module IntMap = Map.Make({
-    type t = int;
-    let compare: (int, int) => (int) = compare;
-  });
+  module IntMap =
+    Map.Make({
+      type t = int;
+      let compare: (int, int) => int = compare;
+    });
 
   type t = ref(IntMap.t(withParent));
 
@@ -29,40 +30,34 @@ module MockDatabase: Database = {
 
   let create = ref(IntMap.empty);
 
-  let filterBySlug = (db: t, slug) =>
-  {
+  let filterBySlug = (db: t, slug) => {
     let dict = Js.Dict.empty();
     let flatDict = Js.Dict.empty();
 
     IntMap.iter(
       (id, commentWithParent: withParent) => {
-          let idString = id |> string_of_int;
-          if ((commentWithParent.comment)->Comment.slug == slug) {
-            switch (commentWithParent.parent_id) {
-              | None => {
-                let withChildren = Comment.createWithChildren(
-                  ~comment= commentWithParent.comment,
-                  ~children= Js.Dict.empty(),
-                );
-                Js.Dict.set(flatDict, idString, withChildren);
-                Js.Dict.set(dict, idString, withChildren);
-              }
-              | Some(parent_id) => {
-                let withChildren = Comment.createWithChildren(
-                  ~comment= commentWithParent.comment,
-                  ~children= Js.Dict.empty(),
-                );
-                Js.Dict.set(flatDict, idString, withChildren);
-                let parent = Js.Dict.unsafeGet(flatDict, parent_id |> string_of_int);
-                Js.Dict.set(parent.children, idString, withChildren);
-              }
-            }
-          }
-        },
-      db^
+        let idString = id |> string_of_int;
+        if (commentWithParent.comment->Comment.slug == slug) {
+          let withChildren =
+            Comment.createWithChildren(
+              ~comment=commentWithParent.comment,
+              ~children=Js.Dict.empty(),
+            );
+          Js.Dict.set(flatDict, idString, withChildren);
+
+          switch (commentWithParent.parent_id) {
+          | None => Js.Dict.set(dict, idString, withChildren)
+          | Some(parent_id) =>
+            let parent =
+              Js.Dict.unsafeGet(flatDict, parent_id |> string_of_int);
+            Js.Dict.set(parent.children, idString, withChildren);
+          };
+        };
+      },
+      db^,
     );
 
-    dict
+    dict;
   };
 
   let add = (db, withParent) => {
@@ -85,14 +80,16 @@ module MakeServer = (DB: Database) => {
   let create = {
     let database = DB.create;
 
-    let comment1 = Comment.create(
+    let comment1 =
+      Comment.create(
         ~commenter=Guest({name: "bob", url: None}),
         ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
         ~slug="lesleylai.info",
         ~text="Test the functionality of the comments",
       );
 
-    let comment2 = Comment.create(
+    let comment2 =
+      Comment.create(
         ~commenter=Guest({name: "bob2", url: Some("bob.com")}),
         ~date=Js.Date.makeWithYMD(~year=2020., ~month=2., ~date=1., ()),
         ~slug="lesleylai.info",
@@ -101,12 +98,12 @@ module MakeServer = (DB: Database) => {
 
     DB.add(
       database,
-      Comment.createWithParent(~comment= comment1, ~parent_id= None),
+      Comment.createWithParent(~comment=comment1, ~parent_id=None),
     );
 
     DB.add(
       database,
-      Comment.createWithParent(~comment= comment2, ~parent_id= Some(0)),
+      Comment.createWithParent(~comment=comment2, ~parent_id=Some(0)),
     );
 
     let app = express();
