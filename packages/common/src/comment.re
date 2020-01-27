@@ -78,8 +78,11 @@ module Encode = {
 
   let rec commentWithChildren = (w: withChildren) => {
     let fields =
-      [("comment", comment(w.comment)),
-       ("children", dict(commentWithChildren, w.children))];
+      [("comment", comment(w.comment))]
+      ->ListUtil.addIf(
+      w.children -> Js.Dict.entries -> Array.length != 0,
+      ("children", dict(commentWithChildren, w.children))
+    );
     object_(fields);
   };
   
@@ -117,8 +120,10 @@ module Decode = {
   let rec commentWithChildren = (json: Js.Json.t) => {
     {
       comment: json |> field("comment", comment),
-      children: json |> field("children", dict(commentWithChildren))
-    };
+      children: (json
+                |> optional(field("children", dict(commentWithChildren))))
+                -> Option.getWithDefault(Js.Dict.empty())
+    }
   };
 
   let commentWithChildrenDict = dict(commentWithChildren);

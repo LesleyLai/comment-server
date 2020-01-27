@@ -25,13 +25,8 @@ Need to `build` first.
 
 ### Watch
 
-In one terminal
-
-```
-yarn watch
-```
-
-to enable the hot recompilation.
+Unfortunately, I cannot find a way to make lerna work with bucklescript compiler yet.
+Currently, you can `cd` into folders of each individual packages and watch build on them with `yarn watch`.
 
 In another terminal
 
