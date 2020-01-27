@@ -85,10 +85,9 @@ module CommentArea = {
     let (replyToggle, setReplyToggle) = React.useState(() => false);
 
     let commenterUserName =
-          switch (comment->Comment.commenter) {
-          | Comment.Anonymous => "anonymous"
-          | Comment.Guest(guest) => guest.name
-          };
+      switch (comment->Comment.commenter) {
+      | Comment.Guest(guest) => guest.name
+      };
 
     <TextAreaWrapper userName=commenterUserName>
       <header className=Style.commentHeader>
@@ -105,7 +104,7 @@ module CommentArea = {
         <a href="#" onClick={_ => setReplyToggle(_ => !replyToggle)}>
           {"reply" |> React.string}
         </a>
-        { replyToggle ? <CommentInputArea userName /> : React.null }
+        {replyToggle ? <CommentInputArea userName /> : React.null}
       </footer>
     </TextAreaWrapper>;
   };
@@ -114,7 +113,7 @@ module CommentArea = {
 module Comments = {
   [@react.component]
   let make = () => {
-    let (comments, setComments) = React.useState(() => [||]);
+    let (comments, setComments) = React.useState(() => Js.Dict.empty());
 
     let _ =
       Js.Promise.(
@@ -129,9 +128,7 @@ module Comments = {
         )
         |> then_(Fetch.Response.json)
         |> then_((text: Js.Json.t) =>
-             setComments(_ =>
-               text |> Comment.Decode.comments
-             )
+             setComments(_ => text |> Comment.Decode.commentWithChildrenDict)
              |> resolve
            )
       );
@@ -142,7 +139,10 @@ module Comments = {
       <header>
         <nav className=Style.nav>
           <div>
-            {Printf.sprintf("%i comments", Array.length(comments))
+            {Printf.sprintf(
+               "%i comments",
+               comments |> Js.Dict.entries |> Array.length,
+             )
              |> React.string}
           </div>
           <div> {userName |> React.string} </div>
@@ -150,14 +150,13 @@ module Comments = {
         <CommentInputArea userName />
         <ul className=Style.commentsList>
           {ReasonReact.array(
-             {
-               comments
-               |> Array.map(comment => {
-                    <li key={comment->Comment.id |> string_of_int}>
-                      <CommentArea userName comment />
-                    </li>;
-                  });
-             },
+             comments
+             |> Js.Dict.entries
+             |> Array.map(((id, withChildren: Comment.withChildren)) => {
+                  <li key=id>
+                    <CommentArea userName comment={withChildren.comment} />
+                  </li>
+                }),
            )}
         </ul>
       </header>
