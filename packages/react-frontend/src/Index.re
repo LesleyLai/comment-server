@@ -79,10 +79,18 @@ module CommentInputArea = {
   };
 };
 
-module CommentArea = {
+module type CommentAreaType = {
   [@react.component]
-  let make = (~comment, ~userName) => {
+  let make:
+    (~withChildren: Comment.withChildren, ~userName: string) => React.element;
+};
+
+module rec CommentArea: CommentAreaType = {
+  [@react.component]
+  let make = (~withChildren: Comment.withChildren, ~userName) => {
     let (replyToggle, setReplyToggle) = React.useState(() => false);
+
+    let comment = withChildren.comment;
 
     let commenterUserName =
       switch (comment->Comment.commenter) {
@@ -92,7 +100,7 @@ module CommentArea = {
     <TextAreaWrapper userName=commenterUserName>
       <header className=Style.commentHeader>
         <span> {commenterUserName |> React.string} </span>
-        <span className=Style.bullet> {"*" |> React.string} </span>
+        <span className=Style.bullet> {{js|•|js} |> React.string} </span>
         <span>
           {comment->Comment.date |> Js.Date.toDateString |> React.string}
         </span>
@@ -105,6 +113,15 @@ module CommentArea = {
           {"reply" |> React.string}
         </a>
         {replyToggle ? <CommentInputArea userName /> : React.null}
+        <ul className=Style.commentsList>
+          {ReasonReact.array(
+             withChildren.children
+             |> Js.Dict.entries
+             |> Array.map(((id, child)) => {
+                  <li key=id> <CommentArea userName withChildren=child /> </li>
+                }),
+           )}
+        </ul>
       </footer>
     </TextAreaWrapper>;
   };
@@ -152,10 +169,8 @@ module Comments = {
           {ReasonReact.array(
              comments
              |> Js.Dict.entries
-             |> Array.map(((id, withChildren: Comment.withChildren)) => {
-                  <li key=id>
-                    <CommentArea userName comment={withChildren.comment} />
-                  </li>
+             |> Array.map(((id, withChildren)) => {
+                  <li key=id> <CommentArea userName withChildren /> </li>
                 }),
            )}
         </ul>
