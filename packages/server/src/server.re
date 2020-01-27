@@ -1,6 +1,7 @@
 open Express;
 
 open Common;
+open Comment;
 
 // an imperative data structure that store all the comments
 module type Database = {
@@ -10,30 +11,64 @@ module type Database = {
   let create: t;
 
   // Filter comments by slug
-  let filterBySlug: (t, string) => list(Comment.t);
+  let filterBySlug: (t, string) => Js.Dict.t(withChildren);
 
   // Adds a comment into the database
-  let add: (t, Comment.t) => unit;
+  let add: (t, withParent) => unit;
 };
 
 module MockDatabase: Database = {
-  type t = Hashtbl.t(int, Comment.t);
+  module IntMap = Map.Make({
+    type t = int;
+    let compare: (int, int) => (int) = compare;
+  });
 
-  let create = Hashtbl.create(10);
+  type t = ref(IntMap.t(withParent));
 
-  let filterBySlug = (db, slug) =>
-    Hashtbl.fold(
-      (_, comment, acc) =>
-        if (comment->Comment.slug == slug) {
-          [comment, ...acc];
-        } else {
-          acc;
+  let currentId = ref(0);
+
+  let create = ref(IntMap.empty);
+
+  let filterBySlug = (db: t, slug) =>
+  {
+    let dict = Js.Dict.empty();
+    let flatDict = Js.Dict.empty();
+
+    IntMap.iter(
+      (id, commentWithParent: withParent) => {
+          let idString = id |> string_of_int;
+          if ((commentWithParent.comment)->Comment.slug == slug) {
+            switch (commentWithParent.parent_id) {
+              | None => {
+                let withChildren = Comment.createWithChildren(
+                  ~comment= commentWithParent.comment,
+                  ~children= Js.Dict.empty(),
+                );
+                Js.Dict.set(flatDict, idString, withChildren);
+                Js.Dict.set(dict, idString, withChildren);
+              }
+              | Some(parent_id) => {
+                let withChildren = Comment.createWithChildren(
+                  ~comment= commentWithParent.comment,
+                  ~children= Js.Dict.empty(),
+                );
+                Js.Dict.set(flatDict, idString, withChildren);
+                let parent = Js.Dict.unsafeGet(flatDict, parent_id |> string_of_int);
+                Js.Dict.set(parent.children, idString, withChildren);
+              }
+            }
+          }
         },
-      db,
-      [],
+      db^
     );
 
-  let add = (db, comment) => Hashtbl.add(db, comment->Comment.id, comment);
+    dict
+  };
+
+  let add = (db, withParent) => {
+    db := db^ |> IntMap.add(currentId^, withParent);
+    currentId := currentId^ + 1;
+  };
 };
 
 let getDictString = (dict, key) =>
@@ -49,28 +84,29 @@ let getDictString = (dict, key) =>
 module MakeServer = (DB: Database) => {
   let create = {
     let database = DB.create;
-    DB.add(
-      database,
-      Comment.create(
-        ~id=1,
+
+    let comment1 = Comment.create(
         ~commenter=Guest({name: "bob", url: None}),
         ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
         ~slug="lesleylai.info",
-        ~parent_comment_id=None,
         ~text="Test the functionality of the comments",
-      ),
+      );
+
+    let comment2 = Comment.create(
+        ~commenter=Guest({name: "bob2", url: Some("bob.com")}),
+        ~date=Js.Date.makeWithYMD(~year=2020., ~month=2., ~date=1., ()),
+        ~slug="lesleylai.info",
+        ~text="Reply",
+      );
+
+    DB.add(
+      database,
+      Comment.createWithParent(~comment= comment1, ~parent_id= None),
     );
 
     DB.add(
       database,
-      Comment.create(
-        ~id=2,
-        ~commenter=Guest({name: "bob2", url: None}),
-        ~date=Js.Date.makeWithYMD(~year=2020., ~month=2., ~date=1., ()),
-        ~slug="lesleylai.info",
-        ~parent_comment_id=Some(1),
-        ~text="Reply",
-      ),
+      Comment.createWithParent(~comment= comment2, ~parent_id= Some(0)),
     );
 
     let app = express();
@@ -83,7 +119,7 @@ module MakeServer = (DB: Database) => {
       switch (getDictString(Request.params(req), "slug")) {
       | Some(slug) =>
         database->DB.filterBySlug(slug)
-        |> Json.Encode.list(Comment.Encode.comment)
+        |> Comment.Encode.commentWithChildrenDict
         |> Response.sendJson
       | _ => next(Next.route)
       }

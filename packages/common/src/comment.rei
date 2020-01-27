@@ -8,8 +8,15 @@ type guest = {
 type commenter =
   | Guest(guest);
 
-type withParent;
-type withChildren;
+type withParent = {
+  comment: t,
+  parent_id: option(int),
+};
+
+type withChildren = {
+  comment: t,
+  children: Js.Dict.t(withChildren)
+};
 
 let create:
   (
@@ -21,7 +28,7 @@ let create:
   t;
 
 let createWithParent: (~comment: t, ~parent_id: option(int)) => withParent;
-let createWithChildren: (~comment: t, ~children: Js.Dict.t(t)) => withChildren;
+let createWithChildren: (~comment: t, ~children: Js.Dict.t(withChildren)) => withChildren;
 
 module Encode: {
   let commenter: commenter => Js.Json.t;

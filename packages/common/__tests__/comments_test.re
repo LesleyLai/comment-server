@@ -86,7 +86,16 @@ describe("comments with children serialization", () => {
   open Expect;
   open! Expect.Operators;
 
-  let children = Js.Dict.fromList([("1", comment2)]);
+  let children =
+    Js.Dict.fromList([
+      (
+        "1",
+        Comment.createWithChildren(
+          ~comment=comment2,
+          ~children=Js.Dict.empty(),
+        ),
+      ),
+    ]);
   let commentWC = Comment.createWithChildren(~comment=comment1, ~children);
   test("comment with children", () =>
     expect(commentWC)
