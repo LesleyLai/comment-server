@@ -122,30 +122,8 @@ module MakeServer = (DB: Database) => {
       }
     );
 
-    let port =
-      switch (Js.Nullable.toOption(Env.port)) {
-      | Some(port) => int_of_string(port)
-      | None =>
-        Js.log @@ "Cannot find PORT envirnment variable: default to 3000";
-        3000;
-      };
-
-    App.listen(
-      app,
-      ~port,
-      ~onListen=
-        e =>
-          switch (e) {
-          | exception (Js.Exn.Error(e)) =>
-            Js.log(e);
-            Node.Process.exit(1);
-          | _ => Printf.printf("Listening at localhost:%d", port)
-          },
-      (),
-    );
+    app
   };
 };
 
-module Server = MakeServer(MockDatabase);
 
-let server = Server.create;

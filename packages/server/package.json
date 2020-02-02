@@ -12,7 +12,8 @@
   "license": "MIT",
   "devDependencies": {
     "nodemon": "^2.0.2",
-    "replace": "^1.1.5"
+    "replace": "^1.1.5",
+    "@stroiman/bs-supertest": "https://github.com/LesleyLai/bs-supertest.git"
   },
   "scripts": {
     "build": "bsb -make-world",

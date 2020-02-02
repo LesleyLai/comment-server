@@ -3,6 +3,11 @@
   "sources": [{
     "dir" : "src",
     "subdirs" : true
+  },
+  {
+    "dir" : "__tests__",
+    "type": "dev",
+    "subdirs" : true
   }],
   "bsc-flags": ["-bs-super-errors", "-bs-no-version-header"],
   "package-specs": [{
@@ -12,8 +17,11 @@
   "bs-dependencies": [
     "@glennsl/bs-json",
     "bs-express",
-
     "common"
   ],
-  "refmt": 3
+  "bs-dev-dependencies": ["@glennsl/bs-jest",
+                          "@stroiman/bs-supertest",
+                         ],
+  "refmt": 3,
+  "namespace": true
 }
