@@ -68,11 +68,47 @@ module TextAreaWrapper = {
 };
 
 module CommentInputArea = {
+  let postComment = (~userName, ~commentText) => {
+    let comment1 =
+      Comment.create(
+        ~commenter=Guest({name: userName, url: None}),
+        ~date=Js.Date.fromFloat(Js.Date.now()),
+        ~slug="lesleylai.info",
+        ~text=commentText,
+      );
+
+    let withParent =
+      Comment.createWithParent(~comment=comment1, ~parent_id=None);
+
+    let json = Comment.Encode.commentWithParent(withParent);
+
+    let _ =
+      Fetch.fetchWithInit(
+        "http://127.0.0.1:3000/comment",
+        Fetch.RequestInit.make(
+          ~method_=Post,
+          ~headers=
+            Fetch.HeadersInit.make({"Content-Type": "application/json"}),
+          ~body=Fetch.BodyInit.make(Js.Json.stringify(json)),
+          (),
+        ),
+      );
+
+    ();
+  };
+
   [@react.component]
   let make = (~userName) => {
+    let (commentText, setCommentText) = React.useState(() => "");
     <TextAreaWrapper userName>
-      <textarea className=Style.commentEditor />
-      <button>
+      <textarea
+        className=Style.commentEditor
+        onChange={event =>
+          setCommentText(ReactEvent.Form.target(event)##value)
+        }>
+        {commentText |> React.string}
+      </textarea>
+      <button onClick={_ => postComment(userName, commentText)}>
         {Printf.sprintf("post as %s", userName) |> React.string}
       </button>
     </TextAreaWrapper>;

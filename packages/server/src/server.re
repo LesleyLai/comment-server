@@ -131,7 +131,6 @@ module MakeServer = (DB: Database) => {
       switch (Request.bodyJSON(req)) {
       | Some(json) =>
         json |> Comment.Decode.commentWithParent |> database->DB.add;
-        Js.log(json);
         Response.sendStatus(Ok);
       | None => next(Next.route)
       }
