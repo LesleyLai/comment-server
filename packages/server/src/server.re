@@ -79,33 +79,6 @@ let getDictString = (dict, key) =>
 module MakeServer = (DB: Database) => {
   let create = {
     let database = DB.create;
-
-    let comment1 =
-      Comment.create(
-        ~commenter=Guest({name: "bob", url: None}),
-        ~date=Js.Date.makeWithYMD(~year=2020., ~month=1., ~date=1., ()),
-        ~slug="lesleylai.info",
-        ~text="Test the functionality of the comments",
-      );
-
-    let comment2 =
-      Comment.create(
-        ~commenter=Guest({name: "bob2", url: Some("bob.com")}),
-        ~date=Js.Date.makeWithYMD(~year=2020., ~month=2., ~date=1., ()),
-        ~slug="lesleylai.info",
-        ~text="Reply",
-      );
-
-    DB.add(
-      database,
-      Comment.createWithParent(~comment=comment1, ~parent_id=None),
-    );
-
-    DB.add(
-      database,
-      Comment.createWithParent(~comment=comment2, ~parent_id=Some(0)),
-    );
-
     let app = express();
 
     // TODO: only enable cors conditionally

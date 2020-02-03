@@ -68,7 +68,7 @@ module TextAreaWrapper = {
 };
 
 module CommentInputArea = {
-  let postComment = (~userName, ~commentText) => {
+  let postComment = (~userName, ~commentText, ~parentId=?, ()) => {
     let comment1 =
       Comment.create(
         ~commenter=Guest({name: userName, url: None}),
@@ -78,7 +78,7 @@ module CommentInputArea = {
       );
 
     let withParent =
-      Comment.createWithParent(~comment=comment1, ~parent_id=None);
+      Comment.createWithParent(~comment=comment1, ~parent_id=parentId);
 
     let json = Comment.Encode.commentWithParent(withParent);
 
@@ -98,7 +98,7 @@ module CommentInputArea = {
   };
 
   [@react.component]
-  let make = (~userName) => {
+  let make = (~userName, ~parentId=?) => {
     let (commentText, setCommentText) = React.useState(() => "");
     <TextAreaWrapper userName>
       <textarea
@@ -108,7 +108,8 @@ module CommentInputArea = {
         }>
         {commentText |> React.string}
       </textarea>
-      <button onClick={_ => postComment(userName, commentText)}>
+      <button
+        onClick={_ => postComment(~userName, ~commentText, ~parentId?, ())}>
         {Printf.sprintf("post as %s", userName) |> React.string}
       </button>
     </TextAreaWrapper>;
@@ -118,16 +119,20 @@ module CommentInputArea = {
 module type CommentAreaType = {
   [@react.component]
   let make:
-    (~withChildren: Comment.withChildren, ~userName: string) => React.element;
+    (
+      ~commentId: int,
+      ~withChildren: Comment.withChildren,
+      ~userName: string
+    ) =>
+    React.element;
 };
 
 module rec CommentArea: CommentAreaType = {
   [@react.component]
-  let make = (~withChildren: Comment.withChildren, ~userName) => {
+  let make = (~commentId: int, ~withChildren: Comment.withChildren, ~userName) => {
     let (replyToggle, setReplyToggle) = React.useState(() => false);
 
     let comment = withChildren.comment;
-
     let commenterUserName =
       switch (comment->Comment.commenter) {
       | Comment.Guest(guest) => guest.name
@@ -145,16 +150,28 @@ module rec CommentArea: CommentAreaType = {
         {React.string(comment->Comment.text)}
       </div>
       <footer>
-        <a href="#" onClick={_ => setReplyToggle(_ => !replyToggle)}>
+        <a
+          href="#"
+          onClick={e => {
+            e->ReactEvent.Synthetic.preventDefault;
+            setReplyToggle(_ => !replyToggle);
+          }}>
           {"reply" |> React.string}
         </a>
-        {replyToggle ? <CommentInputArea userName /> : React.null}
+        {replyToggle
+           ? <CommentInputArea userName parentId=commentId /> : React.null}
         <ul className=Style.commentsList>
           {ReasonReact.array(
              withChildren.children
              |> Js.Dict.entries
              |> Array.map(((id, child)) => {
-                  <li key=id> <CommentArea userName withChildren=child /> </li>
+                  <li key=id>
+                    <CommentArea
+                      commentId={int_of_string(id)}
+                      userName
+                      withChildren=child
+                    />
+                  </li>
                 }),
            )}
         </ul>
@@ -206,7 +223,13 @@ module Comments = {
              comments
              |> Js.Dict.entries
              |> Array.map(((id, withChildren)) => {
-                  <li key=id> <CommentArea userName withChildren /> </li>
+                  <li key=id>
+                    <CommentArea
+                      commentId={int_of_string(id)}
+                      userName
+                      withChildren
+                    />
+                  </li>
                 }),
            )}
         </ul>
