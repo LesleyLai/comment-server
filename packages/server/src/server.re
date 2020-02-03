@@ -109,8 +109,11 @@ module MakeServer = (DB: Database) => {
     let app = express();
 
     // TODO: only enable cors conditionally
-    App.use(app, cors());
+    app->App.use(cors());
+    app->App.use(Middleware.json());
+    app->App.use(Middleware.urlencoded());
 
+    // Gets comments
     App.get(app, ~path="/comments/:slug") @@
     Middleware.from((next, req) =>
       switch (getDictString(Request.params(req), "slug")) {
@@ -122,8 +125,18 @@ module MakeServer = (DB: Database) => {
       }
     );
 
-    app
+    // Creates a comment
+    App.post(app, ~path="/comment") @@
+    Middleware.from((next, req) =>
+      switch (Request.bodyJSON(req)) {
+      | Some(json) =>
+        json |> Comment.Decode.commentWithParent |> database->DB.add;
+        Js.log(json);
+        Response.sendStatus(Ok);
+      | None => next(Next.route)
+      }
+    );
+
+    app;
   };
 };
-
-

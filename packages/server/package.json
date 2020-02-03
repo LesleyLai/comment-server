@@ -18,7 +18,7 @@
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w",
-    "watch-run": "nodemon lib/js/src/server.bs.js",
+    "watch-run": "nodemon lib/js/src/main.bs.js",
     "clean": "bsb -clean-world",
     "test": "jest"
   },
