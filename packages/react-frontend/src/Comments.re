@@ -1,31 +1,11 @@
 open Common;
 
-// Create color hue from hashing a string
-let hueFromString = s => {
-  let hash = ref(0);
-  s |> String.iter(c => {hash := Char.code(c) + hash^ lsl 5 - hash^});
-
-  (hash^ mod 360)->float_of_int;
-};
-
 module ProfileImage = {
   [@react.component]
   let make = (~userName: string, ~diameter=50) => {
-    open Css;
-    let css =
-      style([
-        width(px(diameter)),
-        height(px(diameter)),
-        borderRadius(pct(50.)),
-        color(hex("fff")),
-        backgroundColor(hsl(deg(userName->hueFromString), 100., 30.)),
-        fontSize(px(30)),
-        textAlign(center),
-        lineHeight(px(diameter)),
-        margin(px(10)),
-      ]);
-
-    <div className=css> {userName->String.sub(0, 1) |> React.string} </div>;
+    <div className={Style.profileImage(~diameter, ~userName)}>
+      {userName->String.sub(0, 1) |> React.string}
+    </div>;
   };
 };
 
@@ -75,6 +55,7 @@ module CommentInputArea = {
     <TextAreaWrapper userName>
       <textarea
         className=Style.commentEditor
+        placeholder="Join the discussion..."
         onChange={event =>
           setCommentText(ReactEvent.Form.target(event)##value)
         }>

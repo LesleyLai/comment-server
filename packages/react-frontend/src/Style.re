@@ -1,5 +1,13 @@
 open Css;
 
+// Create color hue from hashing a string
+let hueFromString = s => {
+  let hash = ref(0);
+  s |> String.iter(c => {hash := Char.code(c) + hash^ lsl 5 - hash^});
+
+  (hash^ mod 360)->float_of_int;
+};
+
 let textArea =
   style([
     display(flexBox),
@@ -9,12 +17,35 @@ let textArea =
   ]);
 
 let commentEditor =
-  style([resize(`vertical), width(pct(100.)), height(px(100))]);
+  style([
+    resize(`vertical),
+    height(px(100)),
+    padding(px(10)),
+    selector(
+      "::placeholder",
+      [fontSize(px(18)), color(hex("687a86")), lineHeight(px(30))],
+    ),
+  ]);
 
 let profileImageArea =
   style([width(px(75)), borderRight(px(1), `solid, red)]);
 
-let remainingArea = style([flexGrow(1.)]);
+let profileImage = (~diameter, ~userName) => {
+  style([
+    width(px(diameter)),
+    height(px(diameter)),
+    borderRadius(pct(50.)),
+    color(hex("fff")),
+    backgroundColor(hsl(deg(userName->hueFromString), 100., 30.)),
+    fontSize(px(30)),
+    textAlign(center),
+    lineHeight(px(diameter)),
+    margin(px(10)),
+  ]);
+};
+
+let remainingArea =
+  style([flexGrow(1.), display(flexBox), flexDirection(column)]);
 
 let nav =
   style([
@@ -27,11 +58,8 @@ let nav =
 let commentsList =
   style([listStyleType(`none), padding(zero), margin(zero)]);
 
-let commentHeader =
-  style([display(flexBox), flexDirection(row)]);
+let commentHeader = style([display(flexBox), flexDirection(row)]);
 
-let commentBody =
-  style([margin2(~v=px(10), ~h=zero)]);
+let commentBody = style([margin2(~v=px(10), ~h=zero)]);
 
-let bullet =
-  style([padding2(~v=zero, ~h=px(5))]);
+let bullet = style([padding2(~v=zero, ~h=px(5))]);
