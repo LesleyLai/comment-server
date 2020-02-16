@@ -8,6 +8,12 @@ type guest = {
 type commenter =
   | Guest(guest);
 
+let getUserName = (c: commenter) => {
+  switch c {
+    | Guest({name, _}) => name
+    };
+  };
+
 type t = {
   commenter,
   date: Js.Date.t,

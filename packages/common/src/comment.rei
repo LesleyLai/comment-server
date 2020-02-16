@@ -8,6 +8,8 @@ type guest = {
 type commenter =
   | Guest(guest);
 
+let getUserName: commenter => string;
+
 type withParent = {
   comment: t,
   parent_id: option(int),
