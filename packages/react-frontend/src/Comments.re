@@ -24,36 +24,78 @@ module TextAreaWrapper = {
   };
 };
 
-module CommentInputArea = {
-  let postComment = (~user, ~commentText, ~parentId=?, ()) => {
-    let comment1 =
-      Comment.create(
-        ~commenter=user,
-        ~date=Js.Date.fromFloat(Js.Date.now()),
-        ~slug="lesleylai.info",
-        ~text=commentText,
-      );
+let postComment = (~user, ~commentText, ~parentId=?, ()) => {
+  let comment1 =
+    Comment.create(
+      ~commenter=user,
+      ~date=Js.Date.fromFloat(Js.Date.now()),
+      ~slug="lesleylai.info",
+      ~text=commentText,
+    );
 
-    let withParent =
-      Comment.createWithParent(~comment=comment1, ~parent_id=parentId);
+  let withParent =
+    Comment.createWithParent(~comment=comment1, ~parent_id=parentId);
 
-    let json = Comment.Encode.commentWithParent(withParent);
+  let json = Comment.Encode.commentWithParent(withParent);
 
-    let _ =
-      Fetch.fetchWithInit(
-        "http://127.0.0.1:3000/comment",
-        Fetch.RequestInit.make(
-          ~method_=Post,
-          ~headers=
-            Fetch.HeadersInit.make({"Content-Type": "application/json"}),
-          ~body=Fetch.BodyInit.make(Js.Json.stringify(json)),
-          (),
-        ),
-      );
+  let _ =
+    Fetch.fetchWithInit(
+      "http://127.0.0.1:3000/comment",
+      Fetch.RequestInit.make(
+        ~method_=Post,
+        ~headers=Fetch.HeadersInit.make({"Content-Type": "application/json"}),
+        ~body=Fetch.BodyInit.make(Js.Json.stringify(json)),
+        (),
+      ),
+    );
 
-    ();
+  ();
+};
+
+module GuestInputUserArea = {
+  [@react.component]
+  let make = (~disabled, ~commentText, ~parentId=?) => {
+    let (userName, setUserName) = React.useState(() => "");
+    let (url, setURL) = React.useState(() => None);
+
+    let user = Comment.Guest({name: userName, url});
+    <div>
+      <label>
+        {"Name " |> React.string}
+        <input
+          type_="text"
+          onChange={event =>
+            setUserName(ReactEvent.Form.target(event)##value)
+          }
+        />
+      </label>
+      <label>
+        {"Website (optional) " |> React.string}
+        <input
+          type_="text"
+          onChange={event => {
+            let newURL: string = ReactEvent.Form.target(event)##value;
+            let wrappedNewUrl =
+              if (String.length(newURL) == 0) {
+                None;
+              } else {
+                Some(newURL);
+              };
+            setURL(_ => wrappedNewUrl);
+          }}
+        />
+      </label>
+      // TODO: Validate if the URL is a legal URL
+      <button
+        disabled={disabled && String.length(userName) == 0}
+        onClick={_ => postComment(~user, ~commentText, ~parentId?, ())}>
+        {Printf.sprintf("post") |> React.string}
+      </button>
+    </div>;
   };
+};
 
+module CommentInputArea = {
   [@react.component]
   let make = (~user=?, ~parentId=?) => {
     let (commentText, setCommentText) = React.useState(() => "");
@@ -68,22 +110,11 @@ module CommentInputArea = {
       </textarea>
       {switch (user) {
        | None =>
-        let user = Comment.Guest({name: "Bob", url: None});
-         <>
-           <label>
-             {"Username: " |> React.string}
-             <input type_="text" />
-           </label>
-           <label> 
-            {"URL: " |> React.string} 
-            <input type_="text" /> 
-          </label>
-          <button
+         <GuestInputUserArea
            disabled={String.length(commentText) == 0}
-           onClick={_ => postComment(~user, ~commentText, ~parentId?, ())}>
-           {Printf.sprintf("post") |> React.string}
-         </button>
-         </>
+           commentText
+           ?parentId
+         />
        | Some(u) =>
          <button
            disabled={String.length(commentText) == 0}
@@ -102,7 +133,7 @@ module type CommentAreaType = {
     (
       ~commentId: int,
       ~withChildren: Comment.withChildren,
-      ~user: Comment.commenter =?
+      ~user: Comment.commenter=?
     ) =>
     React.element;
 };
@@ -116,43 +147,44 @@ module rec CommentArea: CommentAreaType = {
     let commenter = comment->Comment.commenter;
 
     <TextAreaWrapper user=commenter>
-        <header className=Style.commentHeader>
-          <span> {commenter |> Comment.getUserName |> React.string} </span>
-          <span className=Style.bullet> {{js|•|js} |> React.string} </span>
-          <span>
-            {comment->Comment.date |> Js.Date.toDateString |> React.string}
-          </span>
-        </header>
-        <div className=Style.commentBody>
-          {React.string(comment->Comment.text)}
-        </div>
-        <footer>
-          <a
-            href="#"
-            onClick={e => {
-              e->ReactEvent.Synthetic.preventDefault;
-              setReplyToggle(_ => !replyToggle);
-            }}>
-            {"reply" |> React.string}
-          </a>
-          {replyToggle ? <CommentInputArea ?user parentId=commentId /> : React.null}
-          <ul className=Style.commentsList>
-            {ReasonReact.array(
-               withChildren.children
-               |> Js.Dict.entries
-               |> Array.map(((id, child)) => {
-                    <li key=id>
-                      <CommentArea
-                        commentId={int_of_string(id)}
-                        ?user
-                        withChildren=child
-                      />
-                    </li>
-                  }),
-             )}
-          </ul>
-        </footer>
-      </TextAreaWrapper>; // TODO: propagate user
+      <header className=Style.commentHeader>
+        <span> {commenter |> Comment.getUserName |> React.string} </span>
+        <span className=Style.bullet> {{js|•|js} |> React.string} </span>
+        <span>
+          {comment->Comment.date |> Js.Date.toDateString |> React.string}
+        </span>
+      </header>
+      <div className=Style.commentBody>
+        {React.string(comment->Comment.text)}
+      </div>
+      <footer>
+        <a
+          href="#"
+          onClick={e => {
+            e->ReactEvent.Synthetic.preventDefault;
+            setReplyToggle(_ => !replyToggle);
+          }}>
+          {"reply" |> React.string}
+        </a>
+        {replyToggle
+           ? <CommentInputArea ?user parentId=commentId /> : React.null}
+        <ul className=Style.commentsList>
+          {ReasonReact.array(
+             withChildren.children
+             |> Js.Dict.entries
+             |> Array.map(((id, child)) => {
+                  <li key=id>
+                    <CommentArea
+                      commentId={int_of_string(id)}
+                      ?user
+                      withChildren=child
+                    />
+                  </li>
+                }),
+           )}
+        </ul>
+      </footer>
+    </TextAreaWrapper>; // TODO: propagate user
   };
 };
 
@@ -184,33 +216,32 @@ let make = () => {
 
   <div>
     <header>
-
-        <nav className=Style.nav>
-          <div>
-            {Printf.sprintf(
-               "%i comments",
-               comments |> Js.Dict.entries |> Array.length,
-             )
-             |> React.string}
-          </div>
-          {userName->Belt.Option.mapWithDefault(React.null, React.string)}
-        </nav>
-        <CommentInputArea ?user />
-      </header>
-      <ul className=Style.commentsList>
-        {ReasonReact.array(
-           comments
-           |> Js.Dict.entries
-           |> Array.map(((id, withChildren)) => {
-                <li key=id>
-                  <CommentArea
-                    commentId={int_of_string(id)}
-                    ?user
-                    withChildren
-                  />
-                </li>
-              }),
-         )}
-      </ul>
+      <nav className=Style.nav>
+        <div>
+          {Printf.sprintf(
+             "%i comments",
+             comments |> Js.Dict.entries |> Array.length,
+           )
+           |> React.string}
+        </div>
+        {userName->Belt.Option.mapWithDefault(React.null, React.string)}
+      </nav>
+      <CommentInputArea ?user />
+    </header>
+    <ul className=Style.commentsList>
+      {ReasonReact.array(
+         comments
+         |> Js.Dict.entries
+         |> Array.map(((id, withChildren)) => {
+              <li key=id>
+                <CommentArea
+                  commentId={int_of_string(id)}
+                  ?user
+                  withChildren
+                />
+              </li>
+            }),
+       )}
+    </ul>
   </div>;
 };
