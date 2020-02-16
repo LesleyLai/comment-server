@@ -52,27 +52,25 @@ let postComment = (~user, ~commentText, ~parentId=?, ()) => {
   ();
 };
 
-module GuestInputUserArea = {
+module GuestAuthArea = {
   [@react.component]
   let make = (~disabled, ~commentText, ~parentId=?) => {
     let (userName, setUserName) = React.useState(() => "");
     let (url, setURL) = React.useState(() => None);
 
     let user = Comment.Guest({name: userName, url});
-    <div>
-      <label>
-        {"Name " |> React.string}
+    <div className=Style.authArea>
+      <div className=Style.authAreaInputs>
         <input
           type_="text"
+          placeholder="Name"
           onChange={event =>
             setUserName(ReactEvent.Form.target(event)##value)
           }
         />
-      </label>
-      <label>
-        {"Website (optional) " |> React.string}
         <input
           type_="text"
+          placeholder="Website (optional)"
           onChange={event => {
             let newURL: string = ReactEvent.Form.target(event)##value;
             let wrappedNewUrl =
@@ -84,10 +82,10 @@ module GuestInputUserArea = {
             setURL(_ => wrappedNewUrl);
           }}
         />
-      </label>
+      </div>
       // TODO: Validate if the URL is a legal URL
       <button
-        disabled={disabled && String.length(userName) == 0}
+        disabled={disabled || String.length(userName) == 0}
         onClick={_ => postComment(~user, ~commentText, ~parentId?, ())}>
         {Printf.sprintf("post") |> React.string}
       </button>
@@ -110,7 +108,7 @@ module CommentInputArea = {
       </textarea>
       {switch (user) {
        | None =>
-         <GuestInputUserArea
+         <GuestAuthArea
            disabled={String.length(commentText) == 0}
            commentText
            ?parentId
@@ -184,7 +182,7 @@ module rec CommentArea: CommentAreaType = {
            )}
         </ul>
       </footer>
-    </TextAreaWrapper>; // TODO: propagate user
+    </TextAreaWrapper>;
   };
 };
 
@@ -217,7 +215,7 @@ let make = () => {
   <div>
     <header>
       <nav className=Style.nav>
-        <div>
+        <div className=Style.commentsCount>
           {Printf.sprintf(
              "%i comments",
              comments |> Js.Dict.entries |> Array.length,

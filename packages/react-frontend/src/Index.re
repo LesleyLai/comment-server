@@ -27,4 +27,4 @@ let makeContainer = text => {
   content;
 };
 
-ReactDOMRe.render(<Comments />, makeContainer("Show comments"));
+ReactDOMRe.render(<Comments />, makeContainer(""));
