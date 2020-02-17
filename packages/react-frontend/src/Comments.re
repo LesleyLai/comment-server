@@ -1,6 +1,7 @@
 open Common;
 
-type setUserType = (option(Comment.commenter) => option(Comment.commenter)) => unit;
+type setUserType =
+  (option(Comment.commenter) => option(Comment.commenter)) => unit;
 
 module ProfileImage = {
   [@react.component]
@@ -86,13 +87,13 @@ module GuestAuthArea = {
         />
       </div>
       // TODO: Validate if the URL is a legal URL
-      <button className=Style.submitButton
+      <button
+        className=Style.submitButton
         disabled={disabled || String.length(userName) == 0}
         onClick={_ => {
           postComment(~user, ~commentText, ~parentId?, ());
-          setUser(_ => Some(user) );
-        }
-          }>
+          setUser(_ => Some(user));
+        }}>
         {Printf.sprintf("post") |> React.string}
       </button>
     </div>;
@@ -121,13 +122,14 @@ module CommentInputArea = {
            ?parentId
          />
        | Some(u) =>
-       <div className=Style.submitAreaForUsers>
-         <button className=Style.submitButton
-           disabled={String.length(commentText) == 0}
-           onClick={_ => postComment(~user=u, ~commentText, ~parentId?, ())}>
-           {Printf.sprintf("post as %s", Comment.getUserName(u))
-            |> React.string}
-         </button>
+         <div className=Style.submitAreaForUsers>
+           <button
+             className=Style.submitButton
+             disabled={String.length(commentText) == 0}
+             onClick={_ => postComment(~user=u, ~commentText, ~parentId?, ())}>
+             {Printf.sprintf("post as %s", Comment.getUserName(u))
+              |> React.string}
+           </button>
          </div>
        }}
     </TextAreaWrapper>;
@@ -148,7 +150,13 @@ module type CommentAreaType = {
 
 module rec CommentArea: CommentAreaType = {
   [@react.component]
-  let make = (~setUser: setUserType, ~commentId: int, ~withChildren: Comment.withChildren, ~user=?) => {
+  let make =
+      (
+        ~setUser: setUserType,
+        ~commentId: int,
+        ~withChildren: Comment.withChildren,
+        ~user=?,
+      ) => {
     let (replyToggle, setReplyToggle) = React.useState(() => false);
 
     let comment = withChildren.comment;
@@ -156,7 +164,9 @@ module rec CommentArea: CommentAreaType = {
 
     <TextAreaWrapper user=commenter>
       <header className=Style.commentHeader>
-        <span className=Style.commenter> {commenter |> Comment.getUserName |> React.string} </span>
+        <span className=Style.commenter>
+          {commenter |> Comment.getUserName |> React.string}
+        </span>
         <span className=Style.bullet> {{js|•|js} |> React.string} </span>
         <span className=Style.date>
           {comment->Comment.date |> Js.Date.toDateString |> React.string}
@@ -239,18 +249,21 @@ let make = () => {
     </header>
     <ul className=Style.commentsList>
       {ReasonReact.array(
-         comments
-         |> Js.Dict.entries
-         |> Array.map(((id, withChildren)) => {
-              <li key=id>
-                <CommentArea
-                  setUser
-                  commentId={int_of_string(id)}
-                  ?user
-                  withChildren
-                />
-              </li>
-            }),
+         {
+           let entries = comments |> Js.Dict.entries;
+           Js.Array.reverseInPlace(entries) |> ignore;
+           entries
+           |> Array.map(((id, withChildren)) => {
+                <li key=id>
+                  <CommentArea
+                    setUser
+                    commentId={int_of_string(id)}
+                    ?user
+                    withChildren
+                  />
+                </li>
+              });
+         },
        )}
     </ul>
   </div>;
