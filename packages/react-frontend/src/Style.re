@@ -8,6 +8,8 @@ let hueFromString = s => {
   (hash^ mod 360)->float_of_int;
 };
 
+let comments = style([fontFamily("sans-serif")]);
+
 let commentsCount = style([fontSize(px(18))]);
 
 let textArea =
@@ -63,13 +65,25 @@ let commentHeader =
     display(flexBox),
     flexDirection(row),
     borderTop(px(1), `solid, hex("bbb")),
+    paddingTop(px(5)),
   ]);
 
 let commentBody = style([margin2(~v=px(10), ~h=zero)]);
 
+let commenter = style([fontWeight(`semiBold)]);
+let date = style([fontWeight(`light), color(hex("666"))]);
 let bullet = style([padding2(~v=zero, ~h=px(5))]);
 
+let replyToggle =
+  style([
+    fontWeight(`semiBold),
+    textDecoration(`none),
+    color(hex("008888")),
+    selector(":hover", [color(hex("003333"))]),
+  ]);
+
 let authArea = style([display(flexBox), justifyContent(spaceBetween)]);
+let submitAreaForUsers = style([display(flexBox), justifyContent(flexEnd)]);
 
 let authAreaInputs =
   style([
@@ -84,5 +98,16 @@ let authAreaInputs =
         borderRadius(px(2)),
         outlineStyle(`none),
       ],
+    ),
+  ]);
+
+let submitButton =
+  style([
+    backgroundColor(hex("CCC")),
+    padding2(~v=px(5), ~h=px(10)),
+    selector(":not(:disabled):hover", [backgroundColor(hex("AAA"))]),
+    selector(
+      ":focus",
+      [border(px(1), `solid, hex("333")), outlineStyle(`none)],
     ),
   ]);

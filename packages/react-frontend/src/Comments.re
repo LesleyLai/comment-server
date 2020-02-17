@@ -84,7 +84,7 @@ module GuestAuthArea = {
         />
       </div>
       // TODO: Validate if the URL is a legal URL
-      <button
+      <button className=Style.submitButton
         disabled={disabled || String.length(userName) == 0}
         onClick={_ => postComment(~user, ~commentText, ~parentId?, ())}>
         {Printf.sprintf("post") |> React.string}
@@ -114,12 +114,14 @@ module CommentInputArea = {
            ?parentId
          />
        | Some(u) =>
-         <button
+       <div className=Style.submitAreaForUsers>
+         <button className=Style.submitButton
            disabled={String.length(commentText) == 0}
            onClick={_ => postComment(~user=u, ~commentText, ~parentId?, ())}>
            {Printf.sprintf("post as %s", Comment.getUserName(u))
             |> React.string}
          </button>
+         </div>
        }}
     </TextAreaWrapper>;
   };
@@ -146,9 +148,9 @@ module rec CommentArea: CommentAreaType = {
 
     <TextAreaWrapper user=commenter>
       <header className=Style.commentHeader>
-        <span> {commenter |> Comment.getUserName |> React.string} </span>
+        <span className=Style.commenter> {commenter |> Comment.getUserName |> React.string} </span>
         <span className=Style.bullet> {{js|•|js} |> React.string} </span>
-        <span>
+        <span className=Style.date>
           {comment->Comment.date |> Js.Date.toDateString |> React.string}
         </span>
       </header>
@@ -158,11 +160,12 @@ module rec CommentArea: CommentAreaType = {
       <footer>
         <a
           href="#"
+          className=Style.replyToggle
           onClick={e => {
             e->ReactEvent.Synthetic.preventDefault;
             setReplyToggle(_ => !replyToggle);
           }}>
-          {"reply" |> React.string}
+          {(replyToggle ? "close" : "reply") |> React.string}
         </a>
         {replyToggle
            ? <CommentInputArea ?user parentId=commentId /> : React.null}
@@ -190,7 +193,6 @@ module rec CommentArea: CommentAreaType = {
 let make = () => {
   let (comments, setComments) = React.useState(() => Js.Dict.empty());
   let (user, setUser) = React.useState(() => None);
-  // let (user, setUser) = React.useState(() => Some(Comment.Guest({name: "Lesley", url: None})));
 
   let userName = Belt.Option.map(user, Comment.getUserName);
 
@@ -212,7 +214,7 @@ let make = () => {
          )
     );
 
-  <div>
+  <div className=Style.comments>
     <header>
       <nav className=Style.nav>
         <div className=Style.commentsCount>
